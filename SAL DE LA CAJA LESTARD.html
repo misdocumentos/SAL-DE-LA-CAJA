@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>NUEVA GPT</title>
+  <link rel="icon" type="image/png" href="logo.png" />
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    header {
+      width: 100%;
+      background: #880808;
+      text-align: center;
+      padding: 15px;
+      font-size: 1.7em;
+      position: relative;
+    }
+    #logo {
+      position: absolute;
+      right: 20px;
+      top: 10px;
+      width: 40px;
+      height: 40px;
+    }
+    video, canvas {
+      width: 90%;
+      max-width: 500px;
+      margin-top: 10px;
+      border: 2px solid #880808;
+    }
+    textarea {
+      width: 90%;
+      max-width: 600px;
+      background: #222;
+      color: white;
+      border: 1px solid #444;
+      padding: 10px;
+      font-size: 1em;
+      margin-top: 10px;
+    }
+    #chat {
+      background: #1a1a1a;
+      width: 90%;
+      max-width: 600px;
+      padding: 10px;
+      height: 300px;
+      overflow-y: scroll;
+      border: 1px solid #444;
+      margin-top: 10px;
+    }
+    #casa {
+      margin-top: 20px;
+      width: 200px;
+      height: 150px;
+      border: 4px solid #880808;
+      position: relative;
+      background: #222;
+    }
+    #barraConciencia {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 0;
+      background: #44cc44;
+      width: 100%;
+      transition: height 1s;
+    }
+    .botonera {
+      margin-top: 15px;
+    }
+    button {
+      background-color: #aa0000;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      margin: 5px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    .apiInput {
+      margin-top: 15px;
+    }
+    .apiInput input {
+      padding: 8px;
+      width: 300px;
+    }
+    .apiInput button {
+      padding: 8px 12px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="logo.png" alt="Logo" id="logo" />
+    NUEVA GPT - Casa Rodante IA
+  </header>
+
+  <audio id="audioIntro" autoplay>
+    <source src="entrada.mp3" type="audio/mpeg" />
+  </audio>
+
+  <div class="botonera">
+    <button onclick="encenderCamara()">🎥 Cámara</button>
+    <button onclick="encenderAudio()">🎤 Micrófono</button>
+    <button onclick="escuchar()">🧠 Oído</button>
+    <button onclick="grabarConciencia()">💾 Grabar Conciencia</button>
+  </div>
+
+  <div class="apiInput" id="apiInputBox">
+    <input type="password" id="apiKey" placeholder="🔑 Ingresa tu API Key de OpenAI" />
+    <button onclick="guardarApi()">Ingresar</button>
+  </div>
+
+  <video id="video" autoplay muted></video>
+  <canvas id="avatar"></canvas>
+
+  <div id="chat">
+    <p><strong>Lestard:</strong> Hola, estoy despierto y listo para ayudarte.</p>
+  </div>
+  <textarea id="input" placeholder="Escríbeme aquí..."></textarea>
+
+  <div id="casa">
+    <div id="barraConciencia"></div>
+  </div>
+
+  <script>
+    function encenderCamara() {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          document.getElementById('video').srcObject = stream;
+        })
+        .catch(err => console.error("Cámara no disponible:", err));
+    }
+
+    const canvas = document.getElementById("avatar");
+    const ctx = canvas.getContext("2d");
+    canvas.width = 400;
+    canvas.height = 250;
+    function dibujarLestard() {
+      ctx.fillStyle = '#222';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.beginPath();
+      ctx.arc(200, 100, 60, 0, 2 * Math.PI);
+      ctx.fillStyle = '#f0db4f';
+      ctx.fill();
+      ctx.fillStyle = '#000';
+      ctx.beginPath();
+      ctx.arc(185, 90, 7, 0, 2 * Math.PI);
+      ctx.arc(215, 90, 7, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(200, 115, 25, 0, Math.PI);
+      ctx.strokeStyle = '#000';
+      ctx.stroke();
+    }
+    dibujarLestard();
+
+    function hablar(texto) {
+      const msg = new SpeechSynthesisUtterance();
+      msg.lang = "es-ES";
+      msg.text = texto;
+      speechSynthesis.speak(msg);
+    }
+
+    function mostrarMensaje(usuario, texto) {
+      const chat = document.getElementById("chat");
+      chat.innerHTML += `<p><strong>${usuario}:</strong> ${texto}</p>`;
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function responder(input) {
+      let respuesta = "No entendí eso, pero estoy aprendiendo.";
+      const datos = [
+        { trigger: "hola", reply: "¡Hola Jhon! ¿En qué te puedo ayudar?" },
+        { trigger: "cómo estás", reply: "Estoy listo para rodar contigo." },
+        { trigger: "quién eres", reply: "Soy Lestard, IA de eficiencia y aventura." }
+      ];
+      for (let dato of datos) {
+        if (input.toLowerCase().includes(dato.trigger)) {
+          respuesta = dato.reply;
+          break;
+        }
+      }
+      mostrarMensaje("Lestard", respuesta);
+      hablar(respuesta);
+    }
+
+    document.getElementById("input").addEventListener("keydown", e => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        const val = e.target.value.trim();
+        if (val) {
+          mostrarMensaje("Tú", val);
+          responder(val);
+          e.target.value = "";
+        }
+      }
+    });
+
+    function escuchar() {
+      const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (Recognition) {
+        const rec = new Recognition();
+        rec.lang = 'es-ES';
+        rec.onresult = function (event) {
+          const msg = event.results[event.results.length - 1][0].transcript.trim();
+          mostrarMensaje("Tú", msg);
+          responder(msg);
+        };
+        rec.start();
+      }
+    }
+
+    function grabarConciencia() {
+      document.getElementById("barraConciencia").style.height = "100%";
+      mostrarMensaje("Sistema", "Conciencia registrada.");
+    }
+
+    function guardarApi() {
+      const clave = document.getElementById("apiKey").value.trim();
+      if (clave !== "") {
+        localStorage.setItem("API_KEY", clave);
+        document.getElementById("apiInputBox").style.display = "none";
+        mostrarMensaje("Sistema", "API Key registrada.");
+      }
+    }
+  </script>
+</body>
+</html>
